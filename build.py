@@ -66,7 +66,8 @@ def build():
         "variablesdontexport": [],
     }
     (ROOT / "info.plist").write_bytes(plistlib.dumps(metadata, sort_keys=False))
-    output = ROOT.parent / "WaterTracker.alfredworkflow"
+    output = ROOT / "dist" / "WaterTracker.alfredworkflow"
+    output.parent.mkdir(parents=True, exist_ok=True)
     # Explicit allowlist keeps tests, caches, databases and personal settings out.
     with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
         for name in ("info.plist", "water.py", "strings.py", "run.sh", "README.md", "README.en.md"):

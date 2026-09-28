@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import plistlib
+import shutil
 import sqlite3
 from string import Formatter
 import subprocess
@@ -178,6 +179,24 @@ class WaterTests(unittest.TestCase):
 
 
 class IntegrationTests(unittest.TestCase):
+    def test_builder_keeps_artifacts_inside_repository(self):
+        with tempfile.TemporaryDirectory(prefix="water clean build ") as directory:
+            checkout = Path(directory) / "WaterTracker"
+            checkout.mkdir()
+            runtime_files = {"water.py", "strings.py", "run.sh", "README.md", "README.en.md"}
+            for name in runtime_files | {"build.py"}:
+                shutil.copy2(ROOT / name, checkout / name)
+            result = subprocess.run([sys.executable, str(checkout / "build.py")],
+                                    cwd=directory, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            package = checkout / "dist" / "WaterTracker.alfredworkflow"
+            self.assertEqual(Path(result.stdout.strip()).resolve(), package.resolve())
+            self.assertEqual(set(Path(directory).iterdir()), {checkout})
+            self.assertTrue((checkout / "info.plist").is_file())
+            with zipfile.ZipFile(package) as archive:
+                self.assertEqual(set(archive.namelist()), runtime_files | {"info.plist"})
+                self.assertIsNone(archive.testzip())
+
     def cli(self, directory, mode, query, **env):
         environment = dict(os.environ, alfred_workflow_data=str(directory), cup_ml="250",
                            goal_ml="2000", interval_minutes="60", language="zh", PYTHONDONTWRITEBYTECODE="1")
@@ -238,7 +257,7 @@ class IntegrationTests(unittest.TestCase):
         language_option = next(c for c in metadata["userconfigurationconfig"] if c["variable"] == "language")
         self.assertEqual(language_option["type"], "popupbutton")
         self.assertEqual(language_option["config"], {"default": "zh", "pairs": [["简体中文", "zh"], ["English", "en"]]})
-        with zipfile.ZipFile(ROOT.parent / "WaterTracker.alfredworkflow") as archive:
+        with zipfile.ZipFile(ROOT / "dist" / "WaterTracker.alfredworkflow") as archive:
             self.assertEqual(set(archive.namelist()), {"info.plist", "water.py", "strings.py", "run.sh", "README.md", "README.en.md"})
             self.assertIsNone(archive.testzip())
             for name in archive.namelist():
@@ -295,7 +314,7 @@ class IntegrationTests(unittest.TestCase):
     def test_extracted_package_in_both_languages(self):
         with tempfile.TemporaryDirectory(prefix="water package ") as directory:
             cwd = Path(directory) / "workflow"
-            with zipfile.ZipFile(ROOT.parent / "WaterTracker.alfredworkflow") as archive:
+            with zipfile.ZipFile(ROOT / "dist" / "WaterTracker.alfredworkflow") as archive:
                 archive.extractall(cwd)
             metadata = plistlib.loads((cwd / "info.plist").read_bytes())
             for lang in ("zh", "en"):

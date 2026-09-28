@@ -1,5 +1,0 @@
-__pycache__/
-*.pyc
-prefs.plist
-.DS_Store
-*.sqlite3*

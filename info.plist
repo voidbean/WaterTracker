@@ -30,11 +30,13 @@
 
 需要 **Alfred 5 + Powerpack** 和 **Python 3.9 或更新版本**，不需要安装 Python 第三方库。
 
-1. 双击仓库根目录中的 `WaterTracker.alfredworkflow`，在 Alfred 中确认导入。
+1. 从仓库的 **Releases** 页面下载 `WaterTracker.alfredworkflow`，双击并在 Alfred 中确认导入。
+   若尚未发布 Release，可按下文从源码构建，安装包位于 `dist/WaterTracker.alfredworkflow`。
 2. 在导入配置页选择语言，设置杯容量、每日目标和补水间隔。
 3. 呼出 Alfred，输入 `water`。
 
-源码位于仓库的 `WaterTracker` 目录；放在项目里不会自动启用，必须先导入安装包。
+仓库根目录就是 `WaterTracker`，直接包含源码与测试；外层 `Alfred` 仅用于本地分类，不属于仓库。
+下载源码不会自动启用工作流，必须先构建并导入安装包。
 也可以通过 Alfred 工作流右键菜单的 Open in Finder 找到安装目录，将安装包内的文件复制到该目录。
 
 启动脚本依次检查 `/opt/homebrew/bin/python3`、`/usr/local/bin/python3`、`/usr/bin/python3`。
@@ -93,15 +95,24 @@
 
 ## 开发验证与重新打包
 
-在源码目录运行（命令中的 `python3` 需要对应 Python 3.9+）：
+在仓库根目录运行（命令中的 `python3` 需要对应 Python 3.9+）：
 
 ```sh
 python3 build.py
 python3 -m unittest discover -s tests -v
 ```
 
-测试使用临时目录，不写入真实饮水记录。`build.py` 生成 `info.plist` 并在上一级目录生成安装包。
+测试使用临时目录，不写入真实饮水记录。`build.py` 生成 `info.plist` 和
+`dist/WaterTracker.alfredworkflow`；不再向仓库外写入安装包。
 仅打包运行必需的文件，不打包本机配置、数据库、测试或缓存。
+
+### 发布产物
+
+- `info.plist` 是 Alfred 运行必需的元数据，继续纳入版本管理；构建后如有变化需和源码一起提交。
+- `dist/` 和所有 `.alfredworkflow` 安装包均已忽略，不随源码提交。
+- 发布时，将经过构建和测试的 `dist/WaterTracker.alfredworkflow` 上传为对应版本的 **Release 附件**。
+- 发布标签应与 `build.py` 中的工作流版本一致，例如版本 `1.1.0` 对应标签 `v1.1.0`。
+- Git 推送源码与标签不会自动上传安装包；本仓库目前没有配置自动发布。
 
 终端调试时可用临时数据目录隔离真实记录：
 
@@ -132,7 +143,9 @@ show the time since your last drink. No network requests, uploads or background 
 
 Requires **Alfred 5 + Powerpack** and **Python 3.9+**. No third-party Python libraries.
 
-1. Download and open `WaterTracker.alfredworkflow` from the repository root.
+1. Download `WaterTracker.alfredworkflow` from the repository's **Releases** page
+   and open it. If no release is available yet, build from source as described
+   below; the package will be at `dist/WaterTracker.alfredworkflow`.
 2. Confirm the import in Alfred, then select **English** under **Language / 语言**.
 3. Set your cup size, daily goal and interval. Open Alfred and type `water`.
 
@@ -144,6 +157,11 @@ The launcher checks `/opt/homebrew/bin/python3`, `/usr/local/bin/python3` and
 `/usr/bin/python3`. If Python is missing, install a current
 [Python macOS package](https://www.python.org/downloads/macos/) and retry.
 The workflow does not install dependencies or change your development environment.
+
+The repository root is `WaterTracker` and directly contains the source and tests.
+The parent `Alfred` folder is only a local organizational folder, not part of the
+repository. Downloading source alone does not install the workflow; build and
+import the package first.
 
 ## Commands
 
@@ -212,7 +230,7 @@ directory, normally:
 
 ## Development
 
-From the source directory, build the metadata/package and then run tests:
+From the repository root, build the metadata/package and then run tests:
 
 ```sh
 python3 build.py
@@ -220,8 +238,21 @@ python3 -m unittest discover -s tests -v
 ```
 
 Tests use temporary directories, never your real drinking records. The builder
-creates `info.plist` and the importable package one directory above the source.
+creates `info.plist` and `dist/WaterTracker.alfredworkflow` inside the repository,
+without writing the package into its parent folder.
 Personal preferences, databases, tests and caches are excluded from the package.
+
+### Release artifacts
+
+- `info.plist` remains tracked because Alfred needs this runtime metadata. Commit
+  any generated changes together with the corresponding source changes.
+- `dist/` and all `.alfredworkflow` packages are ignored, not committed with source.
+- Upload the built and tested `dist/WaterTracker.alfredworkflow` as an attachment
+  to the matching version's **Release**.
+- Match the release tag to the workflow version in `build.py`, for example
+  version `1.1.0` uses tag `v1.1.0`.
+- Pushing source and tags does not upload the package automatically. No automated
+  publishing workflow is configured in this repository yet.
 
 To test manually without changing real records:
 

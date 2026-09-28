@@ -9,7 +9,9 @@ show the time since your last drink. No network requests, uploads or background 
 
 Requires **Alfred 5 + Powerpack** and **Python 3.9+**. No third-party Python libraries.
 
-1. Download and open `WaterTracker.alfredworkflow` from the repository root.
+1. Download `WaterTracker.alfredworkflow` from the repository's **Releases** page
+   and open it. If no release is available yet, build from source as described
+   below; the package will be at `dist/WaterTracker.alfredworkflow`.
 2. Confirm the import in Alfred, then select **English** under **Language / 语言**.
 3. Set your cup size, daily goal and interval. Open Alfred and type `water`.
 
@@ -21,6 +23,11 @@ The launcher checks `/opt/homebrew/bin/python3`, `/usr/local/bin/python3` and
 `/usr/bin/python3`. If Python is missing, install a current
 [Python macOS package](https://www.python.org/downloads/macos/) and retry.
 The workflow does not install dependencies or change your development environment.
+
+The repository root is `WaterTracker` and directly contains the source and tests.
+The parent `Alfred` folder is only a local organizational folder, not part of the
+repository. Downloading source alone does not install the workflow; build and
+import the package first.
 
 ## Commands
 
@@ -89,7 +96,7 @@ directory, normally:
 
 ## Development
 
-From the source directory, build the metadata/package and then run tests:
+From the repository root, build the metadata/package and then run tests:
 
 ```sh
 python3 build.py
@@ -97,8 +104,21 @@ python3 -m unittest discover -s tests -v
 ```
 
 Tests use temporary directories, never your real drinking records. The builder
-creates `info.plist` and the importable package one directory above the source.
+creates `info.plist` and `dist/WaterTracker.alfredworkflow` inside the repository,
+without writing the package into its parent folder.
 Personal preferences, databases, tests and caches are excluded from the package.
+
+### Release artifacts
+
+- `info.plist` remains tracked because Alfred needs this runtime metadata. Commit
+  any generated changes together with the corresponding source changes.
+- `dist/` and all `.alfredworkflow` packages are ignored, not committed with source.
+- Upload the built and tested `dist/WaterTracker.alfredworkflow` as an attachment
+  to the matching version's **Release**.
+- Match the release tag to the workflow version in `build.py`, for example
+  version `1.1.0` uses tag `v1.1.0`.
+- Pushing source and tags does not upload the package automatically. No automated
+  publishing workflow is configured in this repository yet.
 
 To test manually without changing real records:
 

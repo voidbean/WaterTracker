@@ -1,7 +1,9 @@
-.DS_Store
 __pycache__/
 *.py[cod]
 prefs.plist
+.DS_Store
 *.sqlite3*
 .env
 .env.*
+/dist/
+*.alfredworkflow
