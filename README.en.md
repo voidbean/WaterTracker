@@ -59,41 +59,6 @@ pause but logging still works. It does not diagnose dehydration or suggest
 ignoring thirst. Hints appear only during lookup; there are no scheduled
 notifications, background processes or global hotkeys.
 
-## Language support and updates
-
-- Results, elapsed times, notification bodies, help and application errors use
-  the selected language on the next lookup. Raw system diagnostics are unchanged.
-- Configuration labels, loading placeholders and fixed notification titles use
-  both languages rather than changing dynamically.
-- Commands such as `water`, `add` and `undo`, as well as ml units, stay the same.
-- Reimport the new package to update. The bundle ID and database format are
-  unchanged, so existing drinking records need no migration.
-- Runtime translations live in `strings.py`. Tests check matching translation
-  keys and formatting placeholders. No localization framework is required.
-
-## Data and date boundaries
-
-The SQLite file `water.sqlite3` is stored in Alfred's `alfred_workflow_data`
-directory, normally:
-
-```text
-~/Library/Application Support/Alfred/Workflow Data/local.kei.water-tracker/water.sqlite3
-```
-
-- Entries store actual ml, a timestamp and the local date at recording time.
-  Daily totals restart at midnight without deleting history.
-- Time since the last drink can span midnight. Changing the system time zone
-  does not regroup old entries; new entries use the new local date.
-- Undo targets only the displayed last entry for today. A newer entry, a stale
-  menu or crossing midnight causes undo to be rejected instead of deleting the
-  wrong record.
-- SQLite transactions protect concurrent writes. Storage errors or corruption
-  produce an error instead of automatically replacing records with an empty log.
-- Quit Alfred before copying the entire data directory for backup. Reimporting
-  the workflow does not bundle or overwrite personal records.
-- Records are not encrypted and use the macOS user's filesystem permissions.
-  There is no cloud sync or historical data browser.
-
 ## Development
 
 From the repository root, build the metadata/package and then run tests:
