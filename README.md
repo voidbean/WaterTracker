@@ -51,27 +51,6 @@
 本工作流不判断身体是否缺水，也不会因为未到间隔就建议你忍渴。
 提示仅在查询时出现，没有定时通知、后台程序或全局热键。
 
-### 中英双语与升级
-
-- 在 **Configure Workflow… → Language / 语言** 中切换简体中文或 English，下次查询即生效。
-- 查询结果、时间描述、通知正文、帮助和应用错误提示随语言切换；系统错误的底层诊断保留原文。
-- 配置页标签、加载占位文案和固定通知标题采用中英对照，不会随选择动态改变。
-- `water`、`add`、`undo` 等命令和 ml 单位不变；语言缺失或不支持时回退到中文。
-- 重新导入新版安装包更新工作流。沿用原 bundle ID 和数据库格式，无需迁移饮水记录。
-- 所有运行时翻译集中在 `strings.py`，没有额外依赖；测试检查两种语言的键和格式占位符一致。
-
-## 数据与日期边界
-
-- 使用 Alfred 提供的 `alfred_workflow_data` 目录，数据库文件名为 `water.sqlite3`。
-- 通常位置：`~/Library/Application Support/Alfred/Workflow Data/local.kei.water-tracker/water.sqlite3`。
-- 每笔保存实际 ml、时间戳和记录时的本地日期；午夜后今日统计自然归零，历史不会删除。
-- “距上次喝完”可跨天计算；昨天的记录仍是最近一次时会继续显示其间隔。
-- 若切换系统时区，旧记录保留原记录日期，不重新分组；之后的记录按新本地日期归档。
-- 撤销仅作用于菜单显示的今天最后一笔。菜单过期、已有新记录或跨午夜时会拒绝撤销，避免误删。
-- SQLite 事务处理并发与异常中断；数据库不可写或损坏时显示错误，不会用空记录覆盖原文件。
-- 退出 Alfred 后可复制整个数据目录备份。重新导入工作流不包含或覆盖个人记录。
-- 本地记录不会加密；遵循 macOS 用户目录权限。不提供云同步或历史数据浏览界面。
-
 ## 开发验证与重新打包
 
 在仓库根目录运行（命令中的 `python3` 需要对应 Python 3.9+）：
@@ -101,9 +80,3 @@ export alfred_workflow_data="$(mktemp -d)"
 /bin/bash ./run.sh action '{"op":"add","amount":250}'
 /bin/bash ./run.sh filter status
 ```
-
-## Alfred 接入参考
-
-- [Script Filter JSON 格式](https://www.alfredapp.com/help/workflows/inputs/script-filter/json/)
-- [工作流环境变量与持久化目录](https://www.alfredapp.com/help/workflows/script-environment-variables/)
-- [工作流配置页](https://www.alfredapp.com/help/workflows/workflow-configuration/)
